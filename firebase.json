@@ -34,7 +34,7 @@
     ],
     "headers": [
       {
-        "source": "@(index.html|sw.js|manifest.webmanifest|registerSW.js)",
+        "source": "@(index.html|sw.js|manifest.webmanifest|registerSW.js|project-landing.css)",
         "headers": [
           {
             "key": "Cache-Control",
