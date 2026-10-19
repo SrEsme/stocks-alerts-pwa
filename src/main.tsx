@@ -4,7 +4,14 @@ import './index.css'
 import App from './App.tsx'
 
 const syncAppViewportHeight = () => {
-  const height = window.visualViewport?.height ?? window.innerHeight;
+  const isStandalonePwa = window.matchMedia('(display-mode: standalone)').matches
+    || Boolean((window.navigator as Navigator & { standalone?: boolean }).standalone);
+  // iOS can restore a standalone PWA with a stale, shortened visual viewport.
+  // The installed app has no browser toolbar, so the device screen height is the
+  // stable viewport for its full-screen layout.
+  const height = isStandalonePwa
+    ? window.screen.height
+    : window.visualViewport?.height ?? window.innerHeight;
   document.documentElement.style.setProperty('--app-viewport-height', `${Math.round(height)}px`);
 };
 

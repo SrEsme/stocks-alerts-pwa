@@ -82,8 +82,7 @@ html {
 body {
   height: 100%;
   min-height: 0;
-  background: var(--background-primary);
-  background-image: var(--gradient-background);
+  background: #f3f5f1;
   color: var(--text-primary);
   overflow: hidden;
   touch-action: pan-y;
@@ -91,6 +90,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+:root[data-theme="dark"] body { background: #101813; }
 
 /* Scrollbar */
 ::-webkit-scrollbar {
