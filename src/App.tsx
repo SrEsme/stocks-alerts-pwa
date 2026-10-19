@@ -315,7 +315,7 @@ function AppContent() {
       const movers = watchlistItems.slice(0, 5);
       return (
         <div className="overview-page">
-          <div className="page-heading"><div><p className="eyebrow">MARKET WATCH</p><h1>Your portfolio radar</h1><p className="page-subtitle">Prices and alerts for the stocks you follow.</p></div><button className="primary-action" onClick={handleCreateClick}>＋ Create alert</button></div>
+          <div className="page-heading"><div><p className="eyebrow">MARKET WATCH</p><h1>Your portfolio radar</h1><p className="page-subtitle">Prices and alerts for the stocks you follow.</p></div><button className="primary-action" onClick={handleCreateClick}><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg><span>Create alert</span></button></div>
           <section className="summary-grid" aria-label="Portfolio summary">
             <article className="summary-card"><span>Watching</span><strong>{watchlistItems.length}</strong><small>stocks in your list</small></article>
             <article className="summary-card"><span>Active alerts</span><strong>{activeAlerts.length}</strong><small>price conditions</small></article>
@@ -407,15 +407,18 @@ function AppContent() {
         <RefreshCountdown />
 
         {activeTab === 'alerts' && (
-          <div className="alert-view-switch"><button className={alertStatusView === 'active' ? 'selected' : ''} onClick={() => setAlertStatusView('active')}>Active <span>{activeAlerts.length}</span></button><button className={alertStatusView === 'triggered' ? 'selected' : ''} onClick={() => setAlertStatusView('triggered')}>History <span>{triggeredAlerts.length}</span></button></div>
-        )}
-        {activeTab === 'alerts' && (
-          <FilterSortBar
-            searchQuery={alertSearchQuery}
-            onSearchChange={setAlertSearchQuery}
-            sortOption={sortOption}
-            onSortChange={setSortOption}
-          />
+          <div className="alerts-controls">
+            <div className="alert-view-switch" role="tablist" aria-label="Alert status">
+              <button role="tab" aria-selected={alertStatusView === 'active'} className={alertStatusView === 'active' ? 'selected' : ''} onClick={() => setAlertStatusView('active')}>Active <span>{activeAlerts.length}</span></button>
+              <button role="tab" aria-selected={alertStatusView === 'triggered'} className={alertStatusView === 'triggered' ? 'selected' : ''} onClick={() => setAlertStatusView('triggered')}>History <span>{triggeredAlerts.length}</span></button>
+            </div>
+            <FilterSortBar
+              searchQuery={alertSearchQuery}
+              onSearchChange={setAlertSearchQuery}
+              sortOption={sortOption}
+              onSortChange={setSortOption}
+            />
+          </div>
         )}
 
         {activeTab === 'watchlist' && (

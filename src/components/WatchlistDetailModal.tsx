@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { WatchlistItem } from '../types';
 import { StockLogo } from './StockLogo';
 import { triggerHaptic } from '../utils/haptics';
@@ -23,6 +23,20 @@ export const WatchlistDetailModal: React.FC<WatchlistDetailModalProps> = ({
 }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isImageExpanded, setIsImageExpanded] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) setIsImageExpanded(false);
+  }, [isOpen, item?.id]);
+
+  useEffect(() => {
+    if (!isImageExpanded) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsImageExpanded(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [isImageExpanded]);
 
   if (!isOpen || !item) return null;
 
@@ -59,11 +73,16 @@ export const WatchlistDetailModal: React.FC<WatchlistDetailModalProps> = ({
         {/* Hero image at top of modal if available */}
         {item.imageUrl && (
           <div className="watchlist-detail-hero">
-            <img
-              src={item.imageUrl}
-              alt={`${item.ticker} chart`}
-              className="watchlist-detail-hero-img"
-            />
+            <button type="button" className="watchlist-detail-image-button" onClick={() => setIsImageExpanded(true)} aria-label={`View ${item.ticker} image full screen`}>
+              <img
+                src={item.imageUrl}
+                alt={`${item.ticker} chart`}
+                className="watchlist-detail-hero-img"
+              />
+            </button>
+            <span className="watchlist-detail-zoom-hint" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3" /></svg>
+            </span>
             <div className="watchlist-detail-hero-overlay" />
           </div>
         )}
@@ -175,6 +194,12 @@ export const WatchlistDetailModal: React.FC<WatchlistDetailModalProps> = ({
           )}
         </div>
       </div>
+      {isImageExpanded && item.imageUrl && (
+        <div className="watchlist-image-lightbox" role="dialog" aria-modal="true" aria-label={`${item.ticker} image`} onClick={(event) => { event.stopPropagation(); setIsImageExpanded(false); }}>
+          <button type="button" className="watchlist-image-lightbox-close" aria-label="Close enlarged image" onClick={(event) => { event.stopPropagation(); setIsImageExpanded(false); }}>×</button>
+          <img src={item.imageUrl} alt={`${item.ticker} enlarged chart`} onClick={(event) => event.stopPropagation()} />
+        </div>
+      )}
     </div>
   );
 };
