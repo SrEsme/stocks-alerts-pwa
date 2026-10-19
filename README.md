@@ -22,7 +22,7 @@ This setup is suitable for a private, single-owner deployment. Do not invite oth
 
 Alerts are checked on a schedule, so notification delivery is not real time. Stock checks run every 15 minutes from 15:00 through 22:45, Monday to Friday, in `Europe/Madrid`. Crypto checks run every 20 minutes from 07:00 through 23:40 every day in `Europe/Madrid`. A notification can arrive after the target is first reached. Failed Telegram sends are logged, but the alert is still marked as triggered; inspect and change that behavior before relying on alerts for anything time-critical.
 
-The PWA shows an informational countdown to the next scheduled stock and crypto checks. It only updates in the browser and does not call Firebase or change the schedule. The Cloud Scheduler schedules themselves determine scheduled-function usage: with the current cron rules, the stock job runs 32 times per weekday (up to 160 times per week) and the crypto job runs 51 times per day (357 times per week), even when there are no matching active alerts. Together that is up to 517 scheduled executions per week. Separately, each open signed-in PWA refreshes live stock quotes every five minutes while it has tickers to show, invoking the `getStockQuotes` HTTP function; ticker lookups can invoke `getStockPrice`. Review Firebase pricing and quotas and set a billing budget before deploying.
+The PWA shows an informational countdown to the next scheduled stock and crypto checks. It only updates in the browser and does not call Firebase or change the schedule. The Cloud Scheduler schedules themselves determine scheduled-function usage: with the current cron rules, the stock job runs 32 times per weekday (up to 160 times per week) and the crypto job runs 51 times per day (357 times per week), even when there are no matching active alerts. Together that is up to 517 scheduled executions per week. Live stock quotes invoke the `getStockQuotes` HTTP function when the signed-in user's ticker list changes or when they manually refresh; the dashboard does not poll for quotes on a timer. Ticker lookups can invoke `getStockPrice`. Review Firebase pricing and quotas and set a billing budget before deploying.
 
 Stock prices are fetched from Finnhub and crypto prices from CoinGecko. The alert message formats prices as USD. The app dashboard fetches current stock quotes from Finnhub; crypto live quotes are not yet shown in the dashboard. Historical charts, browser push notifications, multiple watchlists, and per-user notification settings are not implemented.
 
@@ -151,6 +151,10 @@ The local frontend uses the Firebase project and deployed Functions URL configur
 - `functions/` — scheduled alert processing, Telegram delivery, and price lookup.
 - `firestore.rules`, `storage.rules` — Firebase access rules.
 - `firebase.json`, `firestore.indexes.json` — Firebase deployment configuration.
+
+## Contributions and feature ideas
+
+Feature ideas, bug reports, and contributions are welcome. Open an issue to suggest a feature or discuss a change before starting substantial work. Pull requests should explain what changed and include any setup or configuration notes that other self-hosters may need. Never include API keys, tokens, Firebase service account files, or other private credentials in an issue or pull request.
 
 ## License
 

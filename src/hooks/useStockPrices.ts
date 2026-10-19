@@ -29,7 +29,6 @@ export function useStockPrices(tickers: string[], user: User | null) {
 
   const tickersRef = useRef<string[]>([]);
   const userIdRef = useRef<string | null>(null);
-  const intervalRef = useRef<number | null>(null);
 
   const fetchQuotes = useCallback(async (tickerList: string[]) => {
     if (tickerList.length === 0) {
@@ -93,22 +92,6 @@ export function useStockPrices(tickers: string[], user: User | null) {
       fetchQuotes(uniqueTickers);
     }
   }, [tickers, fetchQuotes, user?.uid]);
-
-  // Auto-refresh every 5 minutes
-  useEffect(() => {
-    intervalRef.current = window.setInterval(() => {
-      if (tickersRef.current.length > 0) {
-        console.log('🔄 Auto-refreshing stock prices...');
-        fetchQuotes(tickersRef.current);
-      }
-    }, 5 * 60 * 1000); // 5 minutes
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [fetchQuotes]);
 
   return {
     ...state,
