@@ -5,3 +5,48 @@
 @media(max-width:850px){.hero{min-height:0;padding:65px 32px 55px;grid-template-columns:.9fr 1.1fr;gap:30px}.hero h1{font-size:clamp(45px,7vw,62px)}.section{padding:80px 30px;grid-template-columns:.42fr 1.58fr;gap:28px}.architecture{padding:65px 30px;gap:35px}.project-facts{padding:17px 24px;flex-wrap:wrap;justify-content:center}.project-facts>i{display:none}}
 @media(max-width:620px){.site-header{height:64px;padding:0 18px}.wordmark small{display:none}.site-header nav{gap:0}.site-header nav>a:not(.nav-button){display:none}.nav-button{padding:9px 11px;font-size:9px}.hero{padding:54px 22px 40px;grid-template-columns:1fr;gap:36px}.hero h1{font-size:clamp(48px,13vw,67px)}.hero-lede{font-size:12px}.preview-body{padding:18px 15px 14px}.preview{transform:none}.asset-heading,.asset{grid-template-columns:1fr 66px 69px}.asset-name{gap:6px}.preview-disclaimer{font-size:6px}.project-facts{min-height:0;padding:18px 22px;display:grid;grid-template-columns:1fr 1fr;gap:13px;font-size:9px}.section{padding:68px 22px;grid-template-columns:1fr;gap:21px}.about h2,.architecture h2,.self-host h2{font-size:40px}.features{padding-top:8px}.feature-grid{grid-template-columns:1fr}.feature-grid article{min-height:0;padding:17px}.feature-grid h3{margin-top:14px}.architecture{padding:59px 22px;grid-template-columns:1fr;gap:25px}.self-host .button{justify-self:start}footer{padding:17px 19px;flex-wrap:wrap}footer p{order:3;width:100%}}
 @media(prefers-reduced-motion:reduce){:root{scroll-behavior:auto}*,*::before,*::after{transition-duration:.01ms!important}}
+
+/* Keep supporting copy and controls readable across desktop and mobile. */
+:root { font-size: 16px; }
+.wordmark { font-size: 17px; }
+.wordmark small { font-size: 10px; }
+.site-header nav { font-size: 14px; }
+.kicker, .section-label { font-size: 11px; }
+.hero-lede, .about-copy p, .architecture-intro p, .self-host p { font-size: 16px; }
+.button { min-height: 48px; padding-inline: 18px; font-size: 14px; }
+.hero-footnote { font-size: 12px; }
+.preview-bar { font-size: 9px; }
+.preview-bar small { font-size: 8px; }
+.preview-title small, .preview-stats small, .asset-heading { font-size: 10px; }
+.preview-title h2 { font-size: 25px; }
+.preview-avatar { font-size: 12px; }
+.preview-stats strong { font-size: 14px; }
+.asset-heading { font-size: 9px; }
+.asset-name strong, .asset-price { font-size: 12px; }
+.asset-name small { font-size: 10px; }
+.ticker-icon { font-size: 12px; }
+.asset-target { font-size: 11px; }
+.notice > span { font-size: 18px; }
+.notice strong { font-size: 12px; }
+.notice small { font-size: 10px; }
+.notice > b { font-size: 9px; }
+.preview-disclaimer { font-size: 9px; }
+.project-facts { font-size: 14px; }
+.project-facts b, .feature-number { font-size: 11px; }
+.feature-grid p { font-size: 14px; }
+.flow > div > span { font-size: 11px; }
+.flow strong { font-size: 14px; }
+.flow small { font-size: 12px; }
+footer { font-size: 12px; }
+footer .wordmark { font-size: 14px; }
+
+@media (max-width: 850px) {
+  .site-header nav { font-size: 13px; }
+}
+
+@media (max-width: 620px) {
+  .nav-button { font-size: 13px; }
+  .hero-lede { font-size: 16px; }
+  .project-facts { font-size: 13px; }
+  .preview-disclaimer { font-size: 9px; }
+}
