@@ -1,4 +1,5 @@
 :root {
+  --app-viewport-height: 100dvh;
   /* Colors */
   --primary-color: #6366f1;
   --primary-hover: #4f46e5;
@@ -66,7 +67,7 @@ body,
 
 html {
   height: 100%;
-  height: 100dvh;
+  height: var(--app-viewport-height, 100dvh);
   overflow: hidden;
   background: var(--background-primary);
   touch-action: pan-y;

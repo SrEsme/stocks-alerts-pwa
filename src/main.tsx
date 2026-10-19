@@ -3,6 +3,32 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 
+const syncAppViewportHeight = () => {
+  const height = window.visualViewport?.height ?? window.innerHeight;
+  document.documentElement.style.setProperty('--app-viewport-height', `${Math.round(height)}px`);
+};
+
+let viewportSyncFrame = 0;
+const scheduleViewportHeightSync = () => {
+  window.cancelAnimationFrame(viewportSyncFrame);
+  viewportSyncFrame = window.requestAnimationFrame(syncAppViewportHeight);
+};
+
+syncAppViewportHeight();
+window.addEventListener('resize', scheduleViewportHeightSync, { passive: true });
+window.addEventListener('orientationchange', scheduleViewportHeightSync, { passive: true });
+window.addEventListener('pageshow', scheduleViewportHeightSync);
+window.visualViewport?.addEventListener('resize', scheduleViewportHeightSync, { passive: true });
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') scheduleViewportHeightSync();
+});
+
+// iOS can report the previous viewport size for a moment after a cold PWA launch.
+window.addEventListener('pageshow', () => {
+  window.setTimeout(scheduleViewportHeightSync, 100);
+  window.setTimeout(scheduleViewportHeightSync, 400);
+});
+
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js', { scope: '/pwa/' }).catch((error) => {
