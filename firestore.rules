@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Alerts collection - users can only access their own alerts
+    match /alerts/{alertId} {
+      // Allow read if user is authenticated and owns the alert
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      
+      // Allow create if user is authenticated and setting their own userId
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      
+      // Allow update if user owns the alert
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
+      
+      // Allow delete if user owns the alert
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+    
+    // Watchlist collection - users can only access their own watchlist items
+    match /watchlist/{itemId} {
+      // Allow read if user is authenticated and owns the item
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+
+      // Allow create if user is authenticated and setting their own userId
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+
+      // Allow update if user owns the item
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
+
+      // Allow delete if user owns the item
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Users collection - store FCM tokens and other user-specific data
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Legacy FCM tokens collection
+    match /fcmTokens/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}

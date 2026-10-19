@@ -1,0 +1,90 @@
+.bottom-tabs {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(60px + env(safe-area-inset-bottom));
+  background: var(--surface-elevated);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-around;
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 100;
+}
+
+.bottom-tab-button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  gap: 4px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  padding: 8px 0;
+}
+
+.bottom-tab-button.active {
+  color: var(--primary-color);
+}
+
+.bottom-tab-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bottom-tab-svg {
+  width: 24px;
+  height: 24px;
+  transition: transform var(--transition-fast);
+}
+
+.bottom-tab-button.active .bottom-tab-svg {
+  transform: scale(1.1);
+}
+
+.bottom-tab-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bottom-tab-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.bottom-tab-badge {
+  position: absolute;
+  top: -6px;
+  right: -12px;
+  background: var(--primary-color);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  min-width: 18px;
+  border: 2px solid var(--surface-elevated);
+}
+
+.bottom-tab-badge.triggered {
+  background: var(--success-color);
+}
+
+.bottom-tab-badge.watchlist {
+  background: var(--warning-color);
+}
+
+/* On larger screens, the design might still feel better with a top header or we might want to adjust this */
+@media (min-width: 640px) {
+  .bottom-tabs {
+    /* Optional: style for desktop if we want to keep it at bottom or hide it */
+  }
+}

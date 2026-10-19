@@ -1,0 +1,354 @@
+/* ==========================================================================
+   WatchlistCard - Redesigned with hero image layout
+   ========================================================================== */
+
+/* ---------- Base card ---------- */
+.watchlist-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  user-select: none;
+  touch-action: none;
+}
+
+.watchlist-card:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(99, 102, 241, 0.15);
+  transform: translateY(-2px);
+}
+
+.watchlist-card:active {
+  transform: scale(0.98);
+}
+
+/* When no image, use a more compact horizontal feel */
+.watchlist-card.no-image {
+  flex-direction: column;
+}
+
+/* ---------- Drag states ---------- */
+.watchlist-card.dragging {
+  opacity: 0.5;
+  transform: scale(1.02);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+}
+
+.watchlist-card.drag-over {
+  border-color: var(--primary-color);
+  border-style: dashed;
+  border-width: 2px;
+  background: rgba(99, 102, 241, 0.06);
+}
+
+/* ---------- Drag handle ---------- */
+.watchlist-card-drag-handle {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  cursor: grab;
+  padding: 4px 12px;
+  z-index: 5;
+  opacity: 0.5;
+  transition: opacity var(--transition-fast);
+  border-radius: 8px;
+}
+
+.watchlist-card:hover .watchlist-card-drag-handle {
+  opacity: 0.8;
+}
+
+.watchlist-card-drag-handle:active {
+  cursor: grabbing;
+  opacity: 1;
+}
+
+.watchlist-card-drag-handle svg {
+  width: 14px;
+  height: 14px;
+  transform: rotate(90deg);
+}
+
+/* Position handle differently when there's no image */
+.watchlist-card.no-image .watchlist-card-drag-handle {
+  position: absolute;
+  top: 8px;
+}
+
+/* ---------- Hero image area ---------- */
+.watchlist-card-hero {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  min-height: 180px;
+  overflow: hidden;
+  background: var(--surface-dark);
+}
+
+.watchlist-card-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.watchlist-card:hover .watchlist-card-hero-img {
+  transform: scale(1.03);
+}
+
+/* Gradient overlay for text legibility on image */
+.watchlist-card-hero-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(to top, rgba(15, 23, 42, 0.85) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* Ticker badge - bottom left of image */
+.watchlist-card-hero-badge {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 6px 14px 6px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 3;
+}
+
+.watchlist-hero-ticker {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+/* Gain badge - bottom right of image */
+.watchlist-card-hero-gain {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 3;
+  letter-spacing: 0.3px;
+}
+
+.watchlist-card-hero-gain.positive {
+  background: rgba(16, 185, 129, 0.25);
+  color: #34d399;
+}
+
+.watchlist-card-hero-gain.negative {
+  background: rgba(239, 68, 68, 0.25);
+  color: #f87171;
+}
+
+/* ---------- Card body (info section below image) ---------- */
+.watchlist-card-body {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Extra top padding when no image (to clear the drag handle) */
+.watchlist-card.no-image .watchlist-card-body {
+  padding-top: 28px;
+}
+
+/* ---------- No-image: logo row ---------- */
+.watchlist-card-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.watchlist-card-logo-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.watchlist-ticker {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.3px;
+}
+
+.watchlist-current-price {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.watchlist-current-price.up {
+  color: var(--success-color);
+}
+
+.watchlist-current-price.down {
+  color: var(--error-color);
+}
+
+/* Gain badge in no-image layout */
+.watchlist-card-logo-row .watchlist-gain-badge {
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 10px;
+}
+
+.watchlist-gain-badge.positive {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success-color);
+}
+
+.watchlist-gain-badge.negative {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--error-color);
+}
+
+/* ---------- Price row ---------- */
+.watchlist-card-prices {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.watchlist-card-price-current {
+  flex-shrink: 0;
+}
+
+.watchlist-card-price-range {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex: 1;
+  background: var(--surface-dark);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.watchlist-price-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 12px;
+}
+
+.watchlist-price-label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.watchlist-price-value {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.watchlist-price-value.target {
+  color: var(--success-color);
+}
+
+.watchlist-price-divider {
+  width: 1px;
+  height: 32px;
+  background: var(--border-color);
+  flex-shrink: 0;
+}
+
+/* ---------- Thesis preview ---------- */
+.watchlist-card-thesis {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+/* ---------- Arrow / chevron ---------- */
+.watchlist-card-arrow {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+/* For cards with images, position the arrow in the body area */
+.watchlist-card.has-image .watchlist-card-arrow {
+  top: auto;
+  bottom: 20px;
+  right: 16px;
+  transform: none;
+}
+
+.watchlist-card:hover .watchlist-card-arrow {
+  opacity: 0.7;
+  transform: translateY(-50%) translateX(2px);
+}
+
+.watchlist-card.has-image:hover .watchlist-card-arrow {
+  transform: translateX(2px);
+}
+
+.watchlist-card-arrow svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ---------- Responsive: larger screens ---------- */
+@media (min-width: 640px) {
+  .watchlist-card-hero {
+    min-height: 220px;
+  }
+
+  .watchlist-card-body {
+    padding: 16px 20px 20px;
+  }
+
+  .watchlist-card.no-image .watchlist-card-body {
+    padding-top: 32px;
+  }
+}
