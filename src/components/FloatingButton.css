@@ -1,6 +1,6 @@
 .floating-btn {
   position: fixed;
-  bottom: calc(80px + env(safe-area-inset-bottom));
+  bottom: calc(60px + 1rem + env(safe-area-inset-bottom));
   right: 1.5rem;
   width: 56px;
   height: 56px;
@@ -12,10 +12,11 @@
   cursor: pointer;
   box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
   transition: all var(--transition-normal);
-  z-index: 50;
+  z-index: 101;
   display: flex;
   align-items: center;
   justify-content: center;
+  touch-action: manipulation;
 }
 
 .floating-btn:hover {
@@ -54,10 +55,5 @@
 }
 
 @media (min-width: 640px) {
-  .floating-btn {
-    bottom: 2.5rem;
-    right: 2.5rem;
-    width: 64px;
-    height: 64px;
-  }
+  .floating-btn { right: max(2rem, calc((100vw - 1080px) / 2)); }
 }

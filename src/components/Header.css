@@ -53,6 +53,24 @@
   position: relative;
 }
 
+.header-actions { display: flex; align-items: center; gap: 12px; }
+.theme-toggle {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 11px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background: var(--surface-dark);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.theme-toggle:hover { border-color: var(--primary-color); }
+
 .user-avatar-btn {
   width: 40px;
   height: 40px;

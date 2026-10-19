@@ -1,16 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { User } from 'firebase/auth';
-import { RefreshCountdown } from './RefreshCountdown';
 import './Header.css';
 
 interface HeaderProps {
   user?: User | null;
   onLogout?: () => void;
+  theme?: 'light' | 'dark';
+  onToggleTheme?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   user,
-  onLogout
+  onLogout,
+  theme = 'light',
+  onToggleTheme
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -60,8 +63,12 @@ export const Header: React.FC<HeaderProps> = ({
           <h1 className="header-title">Stock Alerts</h1>
         </div>
         
-        <RefreshCountdown />
+        <div className="header-context">Personal market dashboard</div>
         
+        <div className="header-actions">
+        {onToggleTheme && <button className="theme-toggle" onClick={onToggleTheme} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
+          {theme === 'dark' ? '☀' : '☾'}<span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
+        </button>}
         {user && (
           <div className="header-user" ref={menuRef}>
             <button 
@@ -107,6 +114,7 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </div>
         )}
+        </div>
       </div>
       
     </header>

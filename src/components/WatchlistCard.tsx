@@ -6,6 +6,7 @@ import './WatchlistCard.css';
 interface WatchlistCardProps {
   item: WatchlistItem;
   currentPrice?: number;
+  onCreateAlert: () => void;
   onClick: () => void;
   onDragStart: (e: React.DragEvent) => void;
   onDragOver: (e: React.DragEvent) => void;
@@ -20,6 +21,7 @@ interface WatchlistCardProps {
 export const WatchlistCard: React.FC<WatchlistCardProps> = ({
   item,
   currentPrice,
+  onCreateAlert,
   onClick,
   onDragStart,
   onDragOver,
@@ -30,11 +32,11 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({
   isDragging,
   isDragOver,
 }) => {
-  const potentialGain = currentPrice
+  const potentialGain = currentPrice != null && currentPrice > 0
     ? ((item.targetPrice - currentPrice) / currentPrice) * 100
     : ((item.targetPrice - item.entryPrice) / item.entryPrice) * 100;
 
-  const priceVsEntry = currentPrice
+  const priceVsEntry = currentPrice != null
     ? ((currentPrice - item.entryPrice) / item.entryPrice) * 100
     : 0;
 
@@ -90,12 +92,12 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({
       {/* Card body with stock info */}
       <div className="watchlist-card-body">
         {/* If no image, show logo + ticker inline */}
-        {!hasImage && (
+        {(
           <div className="watchlist-card-logo-row">
             <StockLogo ticker={item.ticker} size={40} />
             <div className="watchlist-card-logo-info">
               <span className="watchlist-ticker">{item.ticker}</span>
-              {currentPrice && (
+              {currentPrice != null && (
                 <span className={`watchlist-current-price ${priceVsEntry >= 0 ? 'up' : 'down'}`}>
                   ${currentPrice.toFixed(2)}
                 </span>
@@ -111,7 +113,7 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({
         <div className="watchlist-card-prices">
           {hasImage && (
             <div className="watchlist-card-price-current">
-              {currentPrice && (
+              {currentPrice != null && (
                 <span className={`watchlist-current-price ${priceVsEntry >= 0 ? 'up' : 'down'}`}>
                   ${currentPrice.toFixed(2)}
                 </span>
@@ -135,6 +137,7 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({
         {item.thesis && (
           <p className="watchlist-card-thesis">{item.thesis}</p>
         )}
+        <button className="watchlist-alert-action" onClick={(event) => { event.stopPropagation(); onCreateAlert(); }}>＋ Set price alert</button>
       </div>
 
       {/* Chevron */}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { WatchlistItem } from '../types';
 import { useImageUpload } from '../hooks/useImageUpload';
+import { functionUrl } from '../config/functions';
 import './AddWatchlistModal.css';
 
 interface AddWatchlistModalProps {
@@ -66,7 +67,7 @@ export const AddWatchlistModal: React.FC<AddWatchlistModalProps> = ({
     setFetchingPrice(true);
     try {
       const response = await fetch(
-        `https://us-central1-stocks-alert-app-848e5.cloudfunctions.net/getStockPrice?ticker=${tickerSymbol}`
+        `${functionUrl('getStockPrice')}?ticker=${encodeURIComponent(tickerSymbol)}`
       );
       const data = await response.json();
 

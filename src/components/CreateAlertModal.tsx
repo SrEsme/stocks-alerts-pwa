@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './CreateAlertModal.css';
 import type { Alert } from '../types';
+import { functionUrl } from '../config/functions';
 
 const CRYPTO_TICKERS = ['BTC', 'ETH', 'SOL'] as const;
 
@@ -9,13 +10,17 @@ interface CreateAlertModalProps {
   onClose: () => void;
   onSubmit: (ticker: string, price: number, type: 'ge' | 'le', note?: string, assetType?: 'stock' | 'crypto') => Promise<void>;
   editingAlert?: Alert | null;
+  initialTicker?: string;
+  initialPrice?: number;
 }
 
 export const CreateAlertModal: React.FC<CreateAlertModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
-  editingAlert
+  editingAlert,
+  initialTicker,
+  initialPrice
 }) => {
   const [assetType, setAssetType] = useState<'stock' | 'crypto'>('stock');
   const [ticker, setTicker] = useState('');
@@ -37,14 +42,15 @@ export const CreateAlertModal: React.FC<CreateAlertModalProps> = ({
       fetchPrice(editingAlert.ticker, editingAlert.assetType || 'stock');
     } else {
       setAssetType('stock');
-      setTicker('');
-      setPrice('');
+      setTicker(initialTicker || '');
+      setPrice(initialPrice?.toString() || '');
       setType('ge');
       setNote('');
       setCurrentPrice(null);
+      if (initialTicker) fetchPrice(initialTicker, 'stock');
     }
     setError(null);
-  }, [editingAlert, isOpen]);
+  }, [editingAlert, isOpen, initialTicker, initialPrice]);
 
   const fetchPrice = async (tickerSymbol: string, type: 'stock' | 'crypto' = assetType) => {
     if (!tickerSymbol) return;
@@ -56,13 +62,13 @@ export const CreateAlertModal: React.FC<CreateAlertModalProps> = ({
       if (type === 'crypto') {
         params.set('assetType', 'crypto');
       }
-      const response = await fetch(`https://us-central1-stocks-alert-app-848e5.cloudfunctions.net/getStockPrice?${params}`);
+      const response = await fetch(`${functionUrl('getStockPrice')}?${params}`);
       const data = await response.json();
 
       if (data.success) {
         setCurrentPrice(data.price);
-        if (price) {
-          const targetPriceNum = parseFloat(price);
+        if (initialPrice || price) {
+          const targetPriceNum = initialPrice ?? parseFloat(price);
           if (!isNaN(targetPriceNum)) {
             setType(targetPriceNum > data.price ? 'ge' : 'le');
           }

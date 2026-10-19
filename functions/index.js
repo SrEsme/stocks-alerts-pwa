@@ -3,6 +3,7 @@ import { onSchedule } from "firebase-functions/v2/scheduler";
 import * as logger from "firebase-functions/logger";
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
+import { getAuth } from "firebase-admin/auth";
 import { defineSecret } from "firebase-functions/params";
 
 const DEFAULT_CHAT_ID = defineSecret("DEFAULT_CHAT_ID");
@@ -24,7 +25,8 @@ const CRYPTO_TICKER_TO_ID = {
 export const minuteJob = onSchedule(
   {
     schedule: "*/15 15-22 * * 1-5",
-    timeZone: "Europe/Madrid"
+    timeZone: "Europe/Madrid",
+    secrets: [DEFAULT_CHAT_ID, TELEGRAM_TOKEN, FINN_HUB_API_KEY]
   },
   async (event) => {
     console.log(
@@ -63,7 +65,8 @@ export const minuteJob = onSchedule(
 export const cryptoAlertJob = onSchedule(
   {
     schedule: "*/20 7-23 * * *",
-    timeZone: "Europe/Madrid"
+    timeZone: "Europe/Madrid",
+    secrets: [DEFAULT_CHAT_ID, TELEGRAM_TOKEN, COINGECKO_API_KEY]
   },
   async (event) => {
     console.log(
@@ -175,34 +178,11 @@ async function processAlerts(alerts, pricesMap) {
   console.log(`✅ Successfully updated ${alertsToUpdate.length} alerts`);
 }
 
-// Manual Test function (HTTP)
-export const minuteJobTest = onRequest({ cors: true }, async (req, res) => {
-  console.log('🧪 Manual minuteJob test triggered');
-  try {
-    const snapshot = await db.collection('alerts').where('status', '==', 'active').get();
-    const alerts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    if (alerts.length === 0) {
-      return res.status(200).json({ success: true, message: 'No active alerts' });
-    }
-
-    const uniqueTickers = [...new Set(alerts.map(alert => alert.ticker))];
-    const pricesMap = await getCurrentPrices(uniqueTickers);
-
-    return res.status(200).json({
-      success: true,
-      alertsFound: alerts.length,
-      tickers: uniqueTickers,
-      prices: pricesMap
-    });
-  } catch (error) {
-    console.error('Test error:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
 // Get price for a single ticker (HTTP) - supports both stock and crypto
-export const getStockPrice = onRequest({ cors: true }, async (req, res) => {
+export const getStockPrice = onRequest({
+  cors: true,
+  secrets: [FINN_HUB_API_KEY, COINGECKO_API_KEY]
+}, async (req, res) => {
   const ticker = req.query.ticker;
   const assetType = req.query.assetType || 'stock';
 
@@ -235,6 +215,44 @@ export const getStockPrice = onRequest({ cors: true }, async (req, res) => {
   } catch (error) {
     console.error('Error fetching price:', error);
     res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Fetch a small batch of Finnhub quotes for the authenticated app's dashboard.
+export const getStockQuotes = onRequest({
+  cors: true,
+  secrets: [FINN_HUB_API_KEY]
+}, async (req, res) => {
+  const authorization = req.headers.authorization || '';
+  if (!authorization.startsWith('Bearer ')) return res.status(401).json({ success: false, error: 'Authentication required' });
+  try {
+    await getAuth().verifyIdToken(authorization.slice(7));
+  } catch {
+    return res.status(401).json({ success: false, error: 'Authentication required' });
+  }
+
+  const rawTickers = String(req.query.tickers || '');
+  const tickers = [...new Set(rawTickers.split(',').map(ticker => ticker.trim().toUpperCase()).filter(Boolean))];
+  if (tickers.length === 0) return res.status(400).json({ success: false, error: 'Tickers are required' });
+  if (tickers.length > 20 || tickers.some(ticker => !/^[A-Z0-9.^-]{1,15}$/.test(ticker))) {
+    return res.status(400).json({ success: false, error: 'Provide up to 20 valid ticker symbols' });
+  }
+
+  try {
+    const quotes = {};
+    await Promise.all(tickers.map(async ticker => {
+      const url = `https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(ticker)}&token=${FINN_HUB_API_KEY.value()}`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`Quote provider returned ${response.status}`);
+      const data = await response.json();
+      if (typeof data.c === 'number' && data.c > 0) {
+        quotes[ticker] = { price: data.c, change: data.d ?? 0, changePercent: data.dp ?? 0, high: data.h, low: data.l, open: data.o, previousClose: data.pc };
+      }
+    }));
+    return res.status(200).json({ success: true, quotes });
+  } catch (error) {
+    logger.error('Error fetching stock quotes:', error);
+    return res.status(502).json({ success: false, error: 'Could not fetch stock quotes' });
   }
 });
 

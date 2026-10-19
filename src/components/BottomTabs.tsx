@@ -2,13 +2,12 @@ import React from 'react';
 import { triggerHaptic } from '../utils/haptics';
 import './BottomTabs.css';
 
-export type TabType = 'active' | 'triggered' | 'watchlist';
+export type TabType = 'overview' | 'alerts' | 'watchlist';
 
 interface BottomTabsProps {
   activeTab: TabType;
   onTabChange: (tab: TabType) => void;
   activeCount: number;
-  triggeredCount: number;
   watchlistCount: number;
 }
 
@@ -16,7 +15,6 @@ export const BottomTabs: React.FC<BottomTabsProps> = ({
   activeTab,
   onTabChange,
   activeCount,
-  triggeredCount,
   watchlistCount,
 }) => {
   const handleTabChange = (tab: TabType) => {
@@ -26,10 +24,11 @@ export const BottomTabs: React.FC<BottomTabsProps> = ({
 
   return (
     <nav className="bottom-tabs">
-      <button
-        className={`bottom-tab-button ${activeTab === 'active' ? 'active' : ''}`}
-        onClick={() => handleTabChange('active')}
-      >
+      <button className={`bottom-tab-button ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => handleTabChange('overview')}>
+        <div className="bottom-tab-icon-wrapper"><svg className="bottom-tab-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></div>
+        <span className="bottom-tab-label">Overview</span>
+      </button>
+      <button className={`bottom-tab-button ${activeTab === 'alerts' ? 'active' : ''}`} onClick={() => handleTabChange('alerts')}>
         <div className="bottom-tab-icon-wrapper">
           <svg className="bottom-tab-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
@@ -40,21 +39,6 @@ export const BottomTabs: React.FC<BottomTabsProps> = ({
           )}
         </div>
         <span className="bottom-tab-label">Alerts</span>
-      </button>
-      <button
-        className={`bottom-tab-button ${activeTab === 'triggered' ? 'active' : ''}`}
-        onClick={() => handleTabChange('triggered')}
-      >
-        <div className="bottom-tab-icon-wrapper">
-          <svg className="bottom-tab-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-          </svg>
-          {triggeredCount > 0 && (
-            <span className="bottom-tab-badge triggered">{triggeredCount}</span>
-          )}
-        </div>
-        <span className="bottom-tab-label">Triggered</span>
       </button>
       <button
         className={`bottom-tab-button ${activeTab === 'watchlist' ? 'active' : ''}`}

@@ -2,20 +2,35 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f4f5ef" />
+    <meta name="description" content="Stock Alerts is an open-source, self-hosted PWA for personal stock and crypto watchlists and price alerts." />
+    <title>Stock Alerts — Project overview</title>
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#153d32" />
-    <meta name="description" content="Follow stocks and crypto, build a personal watchlist, and set price alerts for the levels that matter to you." />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Stock Alerts" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <title>Stock Alerts — Your market watch, made personal</title>
+    <link rel="stylesheet" href="/project-landing.css" />
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <header class="site-header">
+      <a class="wordmark" href="#top" aria-label="Stock Alerts project home"><span class="mark" aria-hidden="true">↗</span> stock<span>alerts</span><small>PROJECT OVERVIEW</small></a>
+      <nav aria-label="Main navigation"><a href="#about">About</a><a href="#features">Features</a><a href="#architecture">How it works</a><a class="nav-button" href="https://github.com/SrEsme/stocks-alets-pwa" target="_blank" rel="noreferrer">View on GitHub <span aria-hidden="true">↗</span></a></nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-copy"><p class="kicker"><span></span> A personal market-watching project</p><h1>Choose your price.<br /><em>Let the app</em> watch.</h1><p class="hero-lede">Stock Alerts is a self-hosted progressive web app for keeping a watchlist, recording your investing thesis, and getting notified when an asset reaches a price you care about.</p><div class="hero-actions"><a class="button button-dark" href="https://github.com/SrEsme/stocks-alets-pwa" target="_blank" rel="noreferrer">View the project on GitHub <span aria-hidden="true">↗</span></a><a class="button button-light" href="#about">See what the project does <span aria-hidden="true">↓</span></a></div><p class="hero-footnote">There is no shared PWA instance. Clone the repository and configure your own Firebase project and API credentials to run it.</p></div>
+        <div class="preview" aria-label="Illustration of a watchlist and price alert"><div class="preview-bar"><span><i></i><i></i><i></i></span><b>STOCK ALERTS / OVERVIEW</b><small>YOUR WATCHLIST</small></div><div class="preview-body"><div class="preview-title"><div><small>MONITOR WHAT MATTERS</small><h2>Market watch</h2></div><span class="preview-avatar">P</span></div><div class="preview-stats"><div><small>WATCHLIST</small><strong>Stocks & crypto</strong></div><div><small>PRICE ALERTS</small><strong>At your levels</strong></div></div><div class="asset-heading"><span>ASSET</span><span>PRICE</span><span>YOUR TARGET</span></div><div class="asset"><span class="asset-name"><b class="ticker-icon">A</b><span><strong>AAPL</strong><small>Apple · Stock</small></span></span><span class="asset-price">$ —</span><span class="asset-target">$ target</span></div><div class="asset"><span class="asset-name"><b class="ticker-icon coin">₿</b><span><strong>BTC</strong><small>Bitcoin · Crypto</small></span></span><span class="asset-price">$ —</span><span class="asset-target">$ target</span></div><div class="notice"><span>⌁</span><div><strong>Price condition</strong><small>Get notified when your level is reached</small></div><b>YOUR RULE</b></div><p class="preview-disclaimer">Illustrative interface. Live data depends on your provider configuration.</p></div></div>
+      </section>
+
+      <section class="project-facts" aria-label="Project characteristics"><span><b>01</b> Progressive web app</span><i></i><span><b>02</b> Personal watchlists</span><i></i><span><b>03</b> Custom price alerts</span><i></i><span><b>04</b> Self-hosted backend</span></section>
+
+      <section class="about section" id="about"><div class="section-label">01 / THE PROJECT</div><div class="about-copy"><h2>A small tool for following the prices <em>you choose.</em></h2><p>Instead of watching charts all day, add an asset, set a price condition, and let a scheduled backend check it for you. The app keeps your list, entry and target prices, and notes together in one place.</p><p>It supports stocks and selected cryptocurrencies. The PWA works across desktop and mobile and can be installed from a compatible browser.</p></div></section>
+
+      <section class="features section" id="features"><div class="section-label">02 / WHAT IT DOES</div><div class="feature-grid"><article><span class="feature-number">A</span><h3>Keep a watchlist</h3><p>Track the tickers you care about, with an entry idea, target price, and a short note about your thesis.</p></article><article><span class="feature-number">B</span><h3>Set price conditions</h3><p>Create alerts for prices moving above or below a level, then review active and triggered alerts in the app.</p></article><article><span class="feature-number">C</span><h3>Get a nudge</h3><p>Scheduled Firebase functions check configured price providers and send alert messages to the Telegram destination set by the operator.</p></article></div></section>
+
+      <section class="architecture" id="architecture"><div class="architecture-intro"><div class="section-label">03 / HOW IT WORKS</div><h2>Your app.<br /><em>Your infrastructure.</em></h2><p>Each person can deploy their own copy and connect their own Firebase project, market-data keys, and Telegram bot.</p></div><div class="flow"><div><span>01</span><strong>Progressive web app</strong><small>React · TypeScript · Vite</small></div><b aria-hidden="true">↓</b><div><span>02</span><strong>Accounts & data</strong><small>Firebase Authentication · Firestore</small></div><b aria-hidden="true">↓</b><div><span>03</span><strong>Scheduled checks</strong><small>Cloud Functions · Finnhub · CoinGecko</small></div><b aria-hidden="true">↓</b><div><span>04</span><strong>Alert delivery</strong><small>Telegram Bot API</small></div></div></section>
+
+      <section class="self-host section" id="self-hosting"><div><div class="section-label">04 / MAKE IT YOURS</div><h2>Run your own copy.</h2><p>Each person deploys a private instance with their own Firebase services and provider credentials. The repository README explains how to configure the PWA and backend step by step.</p></div><a class="button button-dark" href="https://github.com/SrEsme/stocks-alets-pwa" target="_blank" rel="noreferrer">View the setup guide on GitHub <span aria-hidden="true">↗</span></a></section>
+    </main>
+    <footer><a class="wordmark" href="#top"><span class="mark" aria-hidden="true">↗</span> stock<span>alerts</span></a><p>Personal tracking tool. Not investment advice.</p><a href="#top">Back to top ↑</a></footer>
   </body>
 </html>
-

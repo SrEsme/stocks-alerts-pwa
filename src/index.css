@@ -34,6 +34,21 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+:root[data-theme="light"] {
+  color-scheme: light;
+  --background-primary: #f3f5f1;
+  --surface-dark: #eef1ec;
+  --surface-card: #ffffff;
+  --surface-elevated: #ffffff;
+  --text-primary: #203229;
+  --text-secondary: #68776d;
+  --text-muted: #8b978e;
+  --primary-color: #356b4d;
+  --border-color: #e2e8e1;
+}
+
+:root[data-theme="dark"] { color-scheme: dark; }
+
 * {
   margin: 0;
   padding: 0;

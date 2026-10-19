@@ -1,84 +1,24 @@
 .refresh-countdown {
+  min-height: 38px;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  background: rgba(99, 102, 241, 0.08);
-  border: 1px solid rgba(99, 102, 241, 0.15);
-  padding: 0.35rem 0.6rem;
-  border-radius: 999px;
-  width: fit-content;
-}
-
-.refresh-countdown.closed {
-  background: rgba(148, 163, 184, 0.08);
-  border-color: rgba(148, 163, 184, 0.15);
-  opacity: 0.8;
-}
-
-.countdown-label {
-  font-size: 0.65rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  justify-content: center;
+  gap: 12px;
+  padding: 7px 16px;
   color: var(--text-secondary);
+  background: var(--surface-card);
+  border-bottom: 1px solid var(--border-color);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
 
-.countdown-time {
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--primary-color);
-  min-width: 50px;
-}
+.countdown-clock { color: var(--primary-color); font-size: 18px; line-height: 1; }
+.countdown-title { color: var(--text-muted); font-weight: 600; }
+.countdown-job strong { color: var(--text-primary); font-weight: 700; }
+.countdown-separator { color: var(--text-muted); }
+.countdown-timezone { color: var(--text-muted); font-size: 11px; }
 
-.refresh-countdown.closed .countdown-time {
-  color: var(--text-muted);
-  font-family: inherit;
-  font-size: 0.7rem;
-}
-
-.countdown-pulse {
-  width: 6px;
-  height: 6px;
-  background: var(--primary-color);
-  border-radius: 50%;
-  position: relative;
-}
-
-.countdown-pulse::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: var(--primary-color);
-  border-radius: 50%;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.8;
-  }
-  100% {
-    transform: scale(2.5);
-    opacity: 0;
-  }
-}
-
-.countdown-icon {
-  font-size: 0.9rem;
-}
-
-@media (max-width: 480px) {
-  .refresh-countdown {
-    margin: 0;
-    padding: 0.25rem 0.5rem;
-  }
-
-  .countdown-label {
-    display: none;
-  }
+@media (max-width: 540px) {
+  .refresh-countdown { gap: 7px; padding: 7px 10px; font-size: 11px; }
+  .countdown-title, .countdown-timezone { display: none; }
 }

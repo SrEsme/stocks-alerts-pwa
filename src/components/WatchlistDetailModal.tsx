@@ -26,11 +26,11 @@ export const WatchlistDetailModal: React.FC<WatchlistDetailModalProps> = ({
 
   if (!isOpen || !item) return null;
 
-  const potentialGain = currentPrice
+  const potentialGain = currentPrice != null && currentPrice > 0
     ? ((item.targetPrice - currentPrice) / currentPrice) * 100
     : ((item.targetPrice - item.entryPrice) / item.entryPrice) * 100;
 
-  const priceVsEntry = currentPrice
+  const priceVsEntry = currentPrice != null
     ? ((currentPrice - item.entryPrice) / item.entryPrice) * 100
     : 0;
 
@@ -75,7 +75,7 @@ export const WatchlistDetailModal: React.FC<WatchlistDetailModalProps> = ({
             </div>
             <div className="watchlist-detail-title">
               <h2>{item.ticker}</h2>
-              {currentPrice && (
+              {currentPrice != null && (
                 <span className={`watchlist-detail-current ${priceVsEntry >= 0 ? 'up' : 'down'}`}>
                   ${currentPrice.toFixed(2)}
                   <span className="watchlist-detail-change">

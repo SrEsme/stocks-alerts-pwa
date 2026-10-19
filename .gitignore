@@ -21,6 +21,7 @@ functions/.env.*
 !functions/.env.example
 .firebase/
 .firebaserc
+functions/.secret.local
 firebase-debug.log
 firestore-debug.log
 

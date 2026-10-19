@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { functionUrl } from '../config/functions';
+import type { User } from 'firebase/auth';
 
 export interface StockQuote {
   price: number;
@@ -17,10 +19,7 @@ export interface StockQuotesState {
   lastUpdated: Date | null;
 }
 
-// Cloud Function URL - adjust if using emulator
-const QUOTES_API_URL = 'https://us-central1-stocks-alert-app-848e5.cloudfunctions.net/getStockQuotes';
-
-export function useStockPrices(tickers: string[]) {
+export function useStockPrices(tickers: string[], user: User | null) {
   const [state, setState] = useState<StockQuotesState>({
     quotes: {},
     loading: false,
@@ -29,19 +28,23 @@ export function useStockPrices(tickers: string[]) {
   });
 
   const tickersRef = useRef<string[]>([]);
+  const userIdRef = useRef<string | null>(null);
   const intervalRef = useRef<number | null>(null);
 
   const fetchQuotes = useCallback(async (tickerList: string[]) => {
     if (tickerList.length === 0) {
-      setState(prev => ({ ...prev, loading: false }));
+      setState({ quotes: {}, loading: false, error: null, lastUpdated: null });
       return;
     }
 
     setState(prev => ({ ...prev, loading: true, error: null }));
 
     try {
-      const url = `${QUOTES_API_URL}?tickers=${tickerList.join(',')}`;
-      const response = await fetch(url);
+      if (!user) throw new Error('Sign in to load market quotes');
+      const params = new URLSearchParams({ tickers: tickerList.join(',') });
+      const url = `${functionUrl('getStockQuotes')}?${params}`;
+      const token = await user.getIdToken();
+      const response = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
       
       if (!response.ok) {
         throw new Error(`Failed to fetch quotes: ${response.statusText}`);
@@ -67,7 +70,7 @@ export function useStockPrices(tickers: string[]) {
         error: err.message || 'Failed to fetch prices'
       }));
     }
-  }, []);
+  }, [user]);
 
   // Refresh function for manual refresh
   const refresh = useCallback(() => {
@@ -82,12 +85,14 @@ export function useStockPrices(tickers: string[]) {
     
     // Only re-fetch if tickers actually changed
     const tickersChanged = JSON.stringify(uniqueTickers) !== JSON.stringify(tickersRef.current);
-    
-    if (tickersChanged) {
+    const userChanged = userIdRef.current !== (user?.uid || null);
+    userIdRef.current = user?.uid || null;
+
+    if (tickersChanged || userChanged) {
       tickersRef.current = uniqueTickers;
       fetchQuotes(uniqueTickers);
     }
-  }, [tickers, fetchQuotes]);
+  }, [tickers, fetchQuotes, user?.uid]);
 
   // Auto-refresh every 5 minutes
   useEffect(() => {

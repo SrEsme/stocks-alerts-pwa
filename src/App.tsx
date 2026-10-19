@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Header } from './components/Header';
 import { BottomTabs, type TabType } from './components/BottomTabs';
 import { AlertCard } from './components/AlertCard';
@@ -14,14 +14,23 @@ import { AddWatchlistModal } from './components/AddWatchlistModal';
 import { useAlerts } from './hooks/useAlerts';
 import { useWatchlist } from './hooks/useWatchlist';
 import { usePullToRefresh } from './hooks/usePullToRefresh';
+import { useStockPrices } from './hooks/useStockPrices';
 import { useAuth, AuthProvider } from './contexts/AuthContext';
 import { triggerHaptic } from './utils/haptics';
+import { RefreshCountdown } from './components/RefreshCountdown';
 import type { Alert, WatchlistItem } from './types';
 import './App.css';
 
 function AppContent() {
   const { user, loading: authLoading, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<TabType>('active');
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    const savedTheme = localStorage.getItem('stock-alerts-theme');
+    if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
+  const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const [alertStatusView, setAlertStatusView] = useState<'active' | 'triggered'>('active');
+  const [initialAlert, setInitialAlert] = useState<{ ticker: string; price?: number } | undefined>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAlert, setEditingAlert] = useState<Alert | null>(null);
 
@@ -36,7 +45,8 @@ function AppContent() {
   const [dragOverItem, setDragOverItem] = useState<WatchlistItem | null>(null);
 
   // Filter & Sort state
-  const [searchQuery, setSearchQuery] = useState('');
+  const [alertSearchQuery, setAlertSearchQuery] = useState('');
+  const [watchlistSearchQuery, setWatchlistSearchQuery] = useState('');
   const [sortOption, setSortOption] = useState<SortOption>('date-desc');
 
   const {
@@ -60,13 +70,38 @@ function AppContent() {
     reorderItems: reorderWatchlistItems
   } = useWatchlist(user?.uid);
 
+  const quoteTickers = useMemo(() => [...new Set([
+    ...watchlistItems.map(item => item.ticker),
+    ...activeAlerts.filter(alert => !alert.assetType || alert.assetType === 'stock').map(alert => alert.ticker)
+  ])].slice(0, 20), [watchlistItems, activeAlerts]);
+  const { quotes, lastUpdated: quotesUpdatedAt, refresh: refreshQuotes } = useStockPrices(quoteTickers, user);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('stock-alerts-theme', nextTheme);
+    setTheme(nextTheme);
+  };
+
+  useEffect(() => {
+    if (localStorage.getItem('stock-alerts-theme')) return;
+    const preference = window.matchMedia('(prefers-color-scheme: dark)');
+    const syncTheme = () => setTheme(preference.matches ? 'dark' : 'light');
+    preference.addEventListener('change', syncTheme);
+    return () => preference.removeEventListener('change', syncTheme);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#101813' : '#f3f5f1');
+  }, [theme]);
+
   const {
     pullDistance,
     isRefreshing,
     isPulling,
     containerRef
   } = usePullToRefresh({
-    onRefresh: refresh
+    onRefresh: async () => { await refresh(); refreshQuotes(); }
   });
 
   const handleEditClick = (alert: Alert) => {
@@ -80,9 +115,16 @@ function AppContent() {
       setEditingWatchlistItem(null);
       setIsWatchlistModalOpen(true);
     } else {
+      setInitialAlert(undefined);
       setEditingAlert(null);
       setIsModalOpen(true);
     }
+  };
+
+  const handleQuickAlert = (item: WatchlistItem) => {
+    setEditingAlert(null);
+    setInitialAlert({ ticker: item.ticker, price: item.targetPrice });
+    setIsModalOpen(true);
   };
 
   const handleModalSubmit = async (ticker: string, price: number, type: 'ge' | 'le', note?: string, assetType?: 'stock' | 'crypto') => {
@@ -172,12 +214,12 @@ function AppContent() {
 
   // Apply filtering and sorting for alerts
   const displayedAlerts = useMemo(() => {
-    const baseAlerts = activeTab === 'active' ? activeAlerts : triggeredAlerts;
+    const baseAlerts = alertStatusView === 'active' ? activeAlerts : triggeredAlerts;
 
     // Filter by search query
     let filtered = baseAlerts;
-    if (searchQuery.trim()) {
-      const query = searchQuery.toUpperCase().trim();
+    if (alertSearchQuery.trim()) {
+      const query = alertSearchQuery.toUpperCase().trim();
       filtered = baseAlerts.filter(a => a.ticker.includes(query));
     }
 
@@ -201,14 +243,16 @@ function AppContent() {
     });
 
     return sorted;
-  }, [activeTab, activeAlerts, triggeredAlerts, searchQuery, sortOption]);
+  }, [alertStatusView, activeAlerts, triggeredAlerts, alertSearchQuery, sortOption]);
+
+  const formatPrice = (price: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(price);
 
   // Filter watchlist by search
   const displayedWatchlist = useMemo(() => {
-    if (!searchQuery.trim()) return watchlistItems;
-    const query = searchQuery.toUpperCase().trim();
+    if (!watchlistSearchQuery.trim()) return watchlistItems;
+    const query = watchlistSearchQuery.toUpperCase().trim();
     return watchlistItems.filter(item => item.ticker.includes(query));
-  }, [watchlistItems, searchQuery]);
+  }, [watchlistItems, watchlistSearchQuery]);
 
   // Show loading while checking auth state
   if (authLoading) {
@@ -233,7 +277,11 @@ function AppContent() {
         <Header
           user={user}
           onLogout={logout}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
+
+        <RefreshCountdown />
         <main className="main-content">
           <div className="loading-container">
             <div className="loading-spinner-large"></div>
@@ -262,6 +310,27 @@ function AppContent() {
   }
 
   const renderContent = () => {
+    if (activeTab === 'overview') {
+      const recentAlerts = [...activeAlerts].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).slice(0, 4);
+      const movers = watchlistItems.slice(0, 5);
+      return (
+        <div className="overview-page">
+          <div className="page-heading"><div><p className="eyebrow">MARKET WATCH</p><h1>Your portfolio radar</h1><p className="page-subtitle">Prices and alerts for the stocks you follow.</p></div><button className="primary-action" onClick={handleCreateClick}>＋ Create alert</button></div>
+          <section className="summary-grid" aria-label="Portfolio summary">
+            <article className="summary-card"><span>Watching</span><strong>{watchlistItems.length}</strong><small>stocks in your list</small></article>
+            <article className="summary-card"><span>Active alerts</span><strong>{activeAlerts.length}</strong><small>price conditions</small></article>
+            <article className="summary-card"><span>Triggered</span><strong>{triggeredAlerts.length}</strong><small>alerts in history</small></article>
+          </section>
+          <section className="dashboard-section">
+            <div className="section-heading"><div><h2>Watchlist</h2><p>Latest prices and distance to your target</p></div><button className="text-action" onClick={() => setActiveTab('watchlist')}>View all <span aria-hidden="true">→</span></button></div>
+            {movers.length ? <div className="quote-table">{movers.map(item => { const quote = quotes[item.ticker]; const gap = quote ? ((item.targetPrice - quote.price) / quote.price) * 100 : null; return <button className="quote-row" key={item.id} onClick={() => handleWatchlistItemClick(item)}><span className="quote-symbol"><b>{item.ticker}</b><small>{item.thesis || 'Watchlist'}</small></span><span className="quote-current">{quote ? formatPrice(quote.price) : '—'}<small className={quote && quote.change >= 0 ? 'positive' : 'negative'}>{quote ? `${quote.change >= 0 ? '+' : ''}${quote.changePercent.toFixed(2)}% today` : 'Quote loading'}</small></span><span className="quote-target">Target {formatPrice(item.targetPrice)}<small>{gap === null ? '—' : `${gap >= 0 ? '+' : ''}${gap.toFixed(1)}% to target`}</small></span><span className="quote-chevron">›</span></button>; })}</div> : <div className="dashboard-empty"><p>Your watchlist is empty.</p><button className="text-action" onClick={() => { setActiveTab('watchlist'); setEditingWatchlistItem(null); setIsWatchlistModalOpen(true); }}>Add a stock</button></div>}
+            <div className="quote-footnote">{quotesUpdatedAt ? `Prices refreshed ${quotesUpdatedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Prices update automatically every 5 minutes'} <button onClick={refreshQuotes}>Refresh</button></div>
+          </section>
+          <section className="dashboard-section"><div className="section-heading"><div><h2>Active alerts</h2><p>Conditions you are tracking</p></div><button className="text-action" onClick={() => setActiveTab('alerts')}>Manage alerts <span aria-hidden="true">→</span></button></div>{recentAlerts.length ? <div className="alerts-grid">{recentAlerts.map(alert => <AlertCard key={alert.id} alert={alert} onDelete={deleteAlert} onEdit={handleEditClick} quote={alert.assetType === 'crypto' ? undefined : quotes[alert.ticker]} lastUpdated={quotesUpdatedAt} />)}</div> : <div className="dashboard-empty"><p>No active alerts yet.</p><button className="text-action" onClick={handleCreateClick}>Create your first alert</button></div>}</section>
+        </div>
+      );
+    }
+
     if (activeTab === 'watchlist') {
       if (displayedWatchlist.length === 0) {
         return (
@@ -278,6 +347,8 @@ function AppContent() {
             <WatchlistCard
               key={item.id}
               item={item}
+              currentPrice={quotes[item.ticker]?.price}
+              onCreateAlert={() => handleQuickAlert(item)}
               onClick={() => handleWatchlistItemClick(item)}
               onDragStart={handleDragStart(item)}
               onDragOver={handleDragOver(item)}
@@ -296,7 +367,7 @@ function AppContent() {
     if (displayedAlerts.length === 0) {
       return (
         <EmptyState
-          type={activeTab}
+          type={alertStatusView}
           onCreateClick={handleCreateClick}
         />
       );
@@ -308,9 +379,11 @@ function AppContent() {
           <AlertCard
             key={alert.id}
             alert={alert}
+            quote={alert.assetType === 'crypto' ? undefined : quotes[alert.ticker]}
+            lastUpdated={quotesUpdatedAt}
             onDelete={deleteAlert}
             onEdit={handleEditClick}
-            onReactivate={activeTab === 'triggered' ? reactivateAlert : undefined}
+            onReactivate={alertStatusView === 'triggered' ? reactivateAlert : undefined}
           />
         ))}
       </div>
@@ -328,12 +401,19 @@ function AppContent() {
         <Header
           user={user}
           onLogout={logout}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
 
-        {activeTab !== 'watchlist' && (
+        <RefreshCountdown />
+
+        {activeTab === 'alerts' && (
+          <div className="alert-view-switch"><button className={alertStatusView === 'active' ? 'selected' : ''} onClick={() => setAlertStatusView('active')}>Active <span>{activeAlerts.length}</span></button><button className={alertStatusView === 'triggered' ? 'selected' : ''} onClick={() => setAlertStatusView('triggered')}>History <span>{triggeredAlerts.length}</span></button></div>
+        )}
+        {activeTab === 'alerts' && (
           <FilterSortBar
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
+            searchQuery={alertSearchQuery}
+            onSearchChange={setAlertSearchQuery}
             sortOption={sortOption}
             onSortChange={setSortOption}
           />
@@ -345,8 +425,8 @@ function AppContent() {
               type="text"
               className="watchlist-search"
               placeholder="Search watchlist..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={watchlistSearchQuery}
+              onChange={(e) => setWatchlistSearchQuery(e.target.value)}
             />
           </div>
         )}
@@ -356,13 +436,12 @@ function AppContent() {
         </main>
       </PullToRefresh>
 
-      <FloatingButton onClick={handleCreateClick} />
+      {activeTab !== 'overview' && <FloatingButton onClick={handleCreateClick} label={activeTab === 'watchlist' ? 'Add to watchlist' : 'Create alert'} />}
 
       <BottomTabs
         activeTab={activeTab}
         onTabChange={setActiveTab}
         activeCount={activeAlerts.length}
-        triggeredCount={triggeredAlerts.length}
         watchlistCount={watchlistItems.length}
       />
 
@@ -374,6 +453,8 @@ function AppContent() {
         }}
         onSubmit={handleModalSubmit}
         editingAlert={editingAlert}
+        initialTicker={initialAlert?.ticker}
+        initialPrice={initialAlert?.price}
       />
 
       <AddWatchlistModal
@@ -389,6 +470,7 @@ function AppContent() {
 
       <WatchlistDetailModal
         item={selectedWatchlistItem}
+        currentPrice={selectedWatchlistItem ? quotes[selectedWatchlistItem.ticker]?.price : undefined}
         isOpen={isDetailModalOpen}
         onClose={() => {
           setIsDetailModalOpen(false);
